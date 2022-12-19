@@ -1,0 +1,45 @@
+version: "3"
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: graphql
+      POSTGRES_PASSWORD: Monolith8159
+    volumes:
+      - /db:/var/lib/postgresql/data
+    ports:
+      - 5444:5432
+
+  app:
+    depends_on:
+      - api
+    restart: on-failure
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+      target: development
+    command: npm run start
+    volumes:
+      - ./app:/usr/src/app
+      - ./app/node_modules:/usr/src/app/node_modules
+    ports:
+      - "3000:80"
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: development
+    command: npm run start:dev
+    env_file:
+      - ./api/.env.development
+      - ./api/.env.production
+    depends_on:
+      - db
+    volumes:
+      - ./api:/usr/src/api
+      - ./api/node_modules:/usr/src/api/node_modules
+    ports:
+      - 5000:5000
