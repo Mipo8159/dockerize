@@ -1,0 +1,63 @@
+version: "3"
+
+services:
+  pg:
+    image: postgres:latest
+    container_name: pg
+    env_file:
+      - ./server/.env
+    volumes:
+      - pg:/var/lib/postgresql/data
+    networks:
+      - myApp
+
+  server:
+    build:
+      dockerfile: Dockerfile
+      context: ./server
+      target: production
+    container_name: server
+    command: npm run start:dev
+    volumes:
+      - /usr/src/app/node_modules
+      - ./server:/usr/src/app
+    networks:
+      - myApp
+    ports:
+      - 5000:5000
+    depends_on:
+      - pg
+
+  frontend:
+    build:
+      dockerfile: Dockerfile
+      context: ./frontend
+    container_name: frontend
+    volumes:
+      - /usr/src/app/node_modules
+      - /usr/src/app/build
+      - ./frontend:/usr/src/app
+    ports:
+      - 80:80
+    networks:
+      - myApp
+
+  nginx:
+    depends_on:
+      - server
+      - frontend
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: ./nginx
+    ports:
+      - "3050:80"
+    networks:
+      - myApp
+
+volumes:
+  pg:
+    driver: local
+networks:
+  myApp:
+    driver: bridge
