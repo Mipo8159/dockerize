@@ -4,7 +4,7 @@ import AppRouter from "./router/AppRouter";
 function App() {
   return (
     <>
-      <h1>Hello there, General Kenobi</h1>
+      <h1>Hello there, General Kenobi2</h1>
       <AppRouter />
     </>
   );
